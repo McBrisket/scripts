@@ -1,8 +1,15 @@
 import csv
 
 # Ask the user for the number of CSV files to use
-num_csv_files = int(input("Enter the number of CSV files: "))
-
+while True:
+    try:
+        num_csv_files = int(input("Enter the number of CSV files: "))
+        if num_csv_files <= 0:
+            raise ValueError
+        break
+    except ValueError:
+        print("Invalid input. Please enter a positive integer.")
+        
 # Create a list of sets to store the MAC addresses
 mac_sets = [set() for i in range(num_csv_files)]
 
