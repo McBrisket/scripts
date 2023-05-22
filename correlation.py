@@ -15,10 +15,15 @@ mac_sets = [set() for i in range(num_csv_files)]
 
 # Open each CSV file and extract the MAC addresses
 for i in range(num_csv_files):
-    csv_file = input(f"Enter the name of CSV file {i+1}: ")
+    while True:
+        csv_file = input(f"Enter the name of CSV file {i+1}: ")
+        if not os.path.isfile(csv_file):
+            print("Invalid file. Please enter a valid file name.")
+        else:
+            break
     with open(csv_file, "r") as f:
         reader = csv.DictReader(f, fieldnames=['BSSID'])
-        next(reader) # skip the first row
+        next(reader)  # skip the first row
         for row in reader:
             mac_address = row["BSSID"].replace(",", "").upper()
             mac_sets[i].add(mac_address)
