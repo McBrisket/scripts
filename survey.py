@@ -28,9 +28,9 @@ os.system(f'sudo airmon-ng start {interface}')
 os.system(f'sudo ifconfig {interface} down')
 os.system(f'sudo macchanger -rb {interface}')
 os.system(f'sudo ifconfig {interface} up')
-
+filename =input(f'Enter filename: ')
 
 #run the airodump survey
-os.system(f'sudo  airodump-ng --band abg {interface}mon')
+os.system(f'sudo  airodump-ng --band abg -w {filename} {interface}mon')
 if 	subprocess.CalledProcessError:
-	os.system(f'sudo  airodump-ng --band abg {interface}')
+	os.system(f'sudo  airodump-ng --band abg -w {filename} {interface}')
