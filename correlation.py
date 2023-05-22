@@ -21,12 +21,13 @@ for i in range(num_csv_files):
             print("Invalid file. Please enter a valid file name.")
         else:
             break
-    with open(csv_file, "r") as f:
-        reader = csv.DictReader(f, fieldnames=['BSSID'])
-        next(reader)  # skip the first row
+     with open(csv_file, "r") as f:
+        reader = csv.DictReader(f)
         for row in reader:
-            mac_address = row["BSSID"].replace(",", "").upper()
+            mac_address = row['BSSID'].replace(",", "").upper()  # Assuming 'BSSID' is the column name for MAC address
             mac_sets[i].add(mac_address)
+            if 'Column14' in row:  # Replace 'Column14' with the actual name of the 14th column
+                column_14[i] = row['Column14']
 
 # Find the common MAC addresses in all sets
 common_macs = set.intersection(*mac_sets)
@@ -48,5 +49,6 @@ print("Common MAC addresses:")
 for mac, count_files in mac_counts.items():
     count = count_files["count"]
     files = ", ".join(count_files["files"])
+    column = column_14[int(files[-1]) - 1]
     if len(mac) >= 16 and count >= 2:
-    	print(f"{mac}: correlated {count} times in {files}")
+        print(f"{mac}: correlated {count} times in {files} (Column 14: {column})")
