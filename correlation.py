@@ -1,4 +1,5 @@
 import csv
+import os
 
 # Ask the user for the number of CSV files to use
 while True:
@@ -11,9 +12,10 @@ while True:
         print("Invalid input. Please enter a positive integer.")
         
 # Create a list of sets to store the MAC addresses
-mac_sets = [set() for i in range(num_csv_files)]
+mac_sets = [set() for _ in range(num_csv_files)]
+column_14_values = {}
 
-# Open each CSV file and extract the MAC addresses
+# Open each CSV file and extract the MAC addresses and the 14th column
 for i in range(num_csv_files):
     while True:
         csv_file = input(f"Enter the name of CSV file {i+1}: ")
@@ -21,13 +23,18 @@ for i in range(num_csv_files):
             print("Invalid file. Please enter a valid file name.")
         else:
             break
-     with open(csv_file, "r") as f:
-        reader = csv.DictReader(f)
+    with open(csv_file, "r") as f:
+        reader = csv.reader(f)
+        next(reader)  # Skip the first row (headers)
         for row in reader:
-            mac_address = row['BSSID'].replace(",", "").upper()  # Assuming 'BSSID' is the column name for MAC address
-            mac_sets[i].add(mac_address)
-            if 'Column14' in row:  # Replace 'Column14' with the actual name of the 14th column
-                column_14[i] = row['Column14']
+            if len(row) >= 1:  # Check if the row has at least one element
+                mac_address = row[0].replace(",", "").upper()  # Assuming MAC addresses are in the 1st column
+                mac_sets[i].add(mac_address)
+                if len(row) >= 14:  # Check if the row has at least 14 columns
+                    column_value = row[13]  # Assuming the 14th column is at index 13
+                    if mac_address not in column_14_values:
+                        column_14_values[mac_address] = set()
+                    column_14_values[mac_address].add(column_value)
 
 # Find the common MAC addresses in all sets
 common_macs = set.intersection(*mac_sets)
@@ -44,11 +51,11 @@ for mac in common_macs:
     if count >= 2:
         mac_counts[mac] = {"count": count, "files": file_set}
 
-# Print the common MAC addresses that appear at least twice and which files they appeared in
+# Print the common MAC addresses that appear at least twice and which files they appeared in along with the corresponding ESSID values
 print("Common MAC addresses:")
 for mac, count_files in mac_counts.items():
     count = count_files["count"]
     files = ", ".join(count_files["files"])
-    column = column_14[int(files[-1]) - 1]
+    essids = ', '.join(column_14_values.get(mac, []))
     if len(mac) >= 16 and count >= 2:
-        print(f"{mac}: correlated {count} times in {files} (Column 14: {column})")
+        print(f"{mac}: correlated {count} times in {files} (ESSIDs: {essids})")
