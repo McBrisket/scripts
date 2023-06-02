@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Airodump Survey</title>
+<link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+<div class="container">
+<h1>Airodump Survey</h1>
+<div class="option">
+<label for="interface">Interface:</label>
+<input type="text" id="interface" placeholder="Enter interface name">
+</div>
+<div class="option">
+<input type="checkbox" id="gps">
+<label for="gps">Enable GPSD</label>
+</div>
+<div class="option">
+<input type="checkbox" id="bssid">
+<label for="bssid">Enable BSSID filter</label>
+<input type="text" id="bssidEntry" placeholder="Enter BSSID">
+</div>
+<div class="option">
+<input type="checkbox" id="essid">
+<label for="essid">Enable ESSID filter</label>
+<input type="text" id="essidEntry" placeholder="Enter ESSID">
+</div>
+<div class="option">
+<input type="checkbox" id="channel">
+<label for="channel">Enable channel filter</label>
+<input type="text" id="channelEntry" placeholder="Enter channel">
+</div>
+<div class="option">
+<input type="checkbox" id="save">
+<label for="save">Save survey</label>
+<input type="text" id="filenameEntry" placeholder="Enter filename">
+</div>
+<button id="startButton">Start Survey</button>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
