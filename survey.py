@@ -23,14 +23,17 @@ for interface in interfaces:
         pass
 
 #set interface to monitor mode and change the MAC address
-os.system(f'sudo airmon-ng stop {interface}')
-os.system(f'sudo airmon-ng start {interface}')
+#os.system(f'sudo airmon-ng stop {interface}')
 os.system(f'sudo ifconfig {interface} down')
 os.system(f'sudo macchanger -rb {interface}')
+os.system(f'sudo iwconfig {interface} mode monitor')
 os.system(f'sudo ifconfig {interface} up')
-filename =input(f'Enter filename: ')
+
 
 #run the airodump survey
-os.system(f'sudo  airodump-ng --band abg -w {filename} {interface}mon')
+os.system(f'sudo  airodump-ng --band abg -w survey_result {interface}mon')
 if 	subprocess.CalledProcessError:
-	os.system(f'sudo  airodump-ng --band abg -w {filename} {interface}')
+	os.system(f'sudo  airodump-ng --band abg -w survey_result {interface}')
+os.system(f'sudo ifconfig {interface} down')
+os.system(f'sudo iwconfig {interface} mode managed')
+os.system(f'sudo ifconfig {interface} up')
