@@ -9,6 +9,7 @@ if os.getuid() != 0:
     exit(1)
 #Find externally connected interface with an IP address
 ip_regex = re.compile(r"inet (?:addr:)?([\d.]+)")
+#if you are getting an error because it is trying to use an interface that you dont want it to use add that interface below as 'and not iface.startswith('interface')' 
 interfaces = [iface for iface in os.listdir('/sys/class/net/') if not iface.startswith('lo') and not iface.startswith('wlp0s20f3') and not iface.startswith('enp57s0f1')]
 
 for interface in interfaces:
