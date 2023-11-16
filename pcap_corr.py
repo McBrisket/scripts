@@ -1,3 +1,4 @@
+#this code kinda works but its kinda garbage because of how long it takes to actually run
 import tkinter as tk
 from tkinter import filedialog
 from scapy.all import rdpcap
