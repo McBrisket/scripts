@@ -2,11 +2,13 @@ import re
 import subprocess
 import time
 import os
+import serial
 
-#Automatically finds the interface and uses it
+# Function to find the externally connected interface with an IP address
 def find_external_interface():
     ip_regex = re.compile(r"inet (?:addr:)?([\d.]+)")
-#change the interfaces below to exclude the loopback, ethernet, and internal NIC
+    
+    # Exclude loopback, ethernet, and internal NIC interfaces
     interfaces = [iface for iface in os.listdir('/sys/class/net/') if not iface.startswith('lo') and not iface.startswith('wlp0s20f3')]
 
     for interface in interfaces:
@@ -21,23 +23,42 @@ def find_external_interface():
 
     return None
 
-#Define a function run_airodump that takes the network interface name (interface) as an argument. 
-#This function constructs the command to run airodump-ng with the specified interface. 
-#It then uses subprocess.Popen to start the process and returns the process object.
+# Function to run airodump-ng on the specified interface
 def run_airodump(interface):
     cmd = f"airodump-ng {interface}"
     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return process
 
-# Define a function parse_airodump that takes the output of airodump-ng as input. 
-#It uses a regular expression (re.compile) to extract information such as BSSID, Signal strength, and Channel from the output.
+# Function to parse the output of airodump-ng and extract relevant information
 def parse_airodump(output):
     pattern = re.compile(r"([0-9A-Fa-f:]{17}).*?(-\d+).*?(\d+)")
     matches = pattern.findall(output)
     return matches
 
-# Define the main function. Set the interface variable to the network interface you're using. 
-#This may vary based on your system and hardware.
+# Function to initialize the GPS lock, wait until a good lock is obtained
+def initialize_gps_lock():
+    print("Initializing GPS lock. Please wait...")
+    while True:
+        latitude, longitude = get_gps_data()
+        if latitude is not None and longitude is not None:
+            print(f"GPS Lock obtained - Latitude: {latitude}, Longitude: {longitude}")
+            return
+
+# Function to obtain GPS data from a serial port
+def get_gps_data(serial_port='/dev/ttyUSB0'):
+    try:
+        with serial.Serial(serial_port, 9600, timeout=1) as ser:
+            line = ser.readline().decode('utf-8').strip()
+            parts = line.split(',')
+            if parts[0] == '$GPGGA' and len(parts) >= 10:
+                latitude = float(parts[2][:2]) + float(parts[2][2:]) / 60.0
+                longitude = float(parts[4][:3]) + float(parts[4][3:]) / 60.0
+                return latitude, longitude
+    except serial.SerialException as e:
+        print(f"Error reading GPS data: {e}")
+    return None, None
+
+# Main function
 def main():
     # Find externally connected interface
     interface = find_external_interface()
@@ -45,9 +66,10 @@ def main():
     if interface is None:
         print("Error: No suitable interface found.")
         return
-# Start a loop that runs indefinitely (while True). Inside the loop, it uses process.communicate() to get the output of airodump-ng. 
-#If there's output, it parses it using the parse_airodump function and prints the relevant information. 
-#This is where you would add your logic for signal strength changes and antenna orientation.
+
+    # Initialize GPS lock before starting airodump-ng
+    initialize_gps_lock()
+
     try:
         process = run_airodump(interface)
         while True:
@@ -61,8 +83,6 @@ def main():
 
             time.sleep(1)
 
-    # Handle a KeyboardInterrupt exception (typically triggered by pressing Ctrl+C). 
-    #Print a message and terminate the airodump-ng process.
     except KeyboardInterrupt:
         print("Exiting...")
         process.terminate()
